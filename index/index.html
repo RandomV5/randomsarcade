@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Arcade</title>
+  <style>
+    :root{
+      --bg:#0f1720;
+      --card:#0f1520aa;
+      --accent:#00e6c3;
+      --muted:#9aa6b2;
+      --glass: rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg) 0%, #071018 100%);
+      color:#e6eef3;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+    }
+    .container{
+      width:100%;
+      max-width:1100px;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      margin-bottom:26px;
+    }
+    .logo{
+      width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#06202a,#083240);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent);font-size:28px;box-shadow:0 6px 18px rgba(0,0,0,0.6);
+    }
+    h1{margin:0;font-size:1.6rem}
+    p.lead{margin:6px 0 0;color:var(--muted)}
+
+    .games-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(230px,1fr));
+      gap:18px;
+      margin-top:22px;
+    }
+
+    .game-card{
+      background: linear-gradient(180deg,var(--card),var(--glass));
+      border:1px solid rgba(255,255,255,0.04);
+      padding:18px;
+      border-radius:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      transition: transform .18s ease, box-shadow .18s ease;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+      min-height:150px;
+    }
+    .game-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,10,30,0.7)}
+
+    .thumb{height:80px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.16));}
+    .thumb img{max-height:72px;max-width:100%;}
+
+    .meta{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .meta .title{font-weight:600}
+    .meta .btn{
+      background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:var(--accent);text-decoration:none;font-weight:600;transition:all .15s ease;
+    }
+    .meta .btn:hover{background:var(--accent);color:#071018;border-color:transparent}
+
+    .desc{color:var(--muted);font-size:0.95rem;margin-top:4px}
+
+    footer{margin-top:28px;text-align:center;color:var(--muted);font-size:0.9rem}
+
+    @media (max-width:520px){
+      .thumb{height:64px}
+      body{padding:18px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">RA</div>
+      <div>
+        <h1>Random Arcade</h1>
+        <p class="lead">A tiny collection of browser games — click any card to play.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="games-grid" aria-label="Games">
+
+        <a class="game-card" href="./game.html">
+          <div class="thumb" aria-hidden="true">
+            <!-- Minesweeper style icon -->
+            <svg width="68" height="68" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="24" height="24" rx="6" fill="#071827"/>
+              <path d="M12 6v6" stroke="#ffd166" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M8 10h8" stroke="#ffd166" stroke-width="1.6" stroke-linecap="round"/>
+              <circle cx="16.5" cy="7.5" r="1.2" fill="#ff6b6b"/>
+            </svg>
+          </div>
+          <div class="meta">
+            <div class="title">Minesweeper</div>
+            <div><span class="btn">Play</span></div>
+          </div>
+          <div class="desc">Classic minesweeper — clear the board without detonating mines.</div>
+        </a>
+
+        <a class="game-card" href="./games/solitaire.html">
+          <div class="thumb" aria-hidden="true">
+            <!-- Solitaire / cards icon -->
+            <svg width="68" height="68" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="4" width="20" height="16" rx="3" fill="#08151c"/>
+              <g fill="#fff" opacity="0.95">
+                <path d="M8 8h6v8H8z" fill="#083b4a"/>
+                <path d="M10 6l1 1 1-1 1 1-1 1 1 1-2 2-2-2 1-1-1-1z" fill="#ff6b6b"/>
+              </g>
+            </svg>
+          </div>
+          <div class="meta">
+            <div class="title">Solitaire</div>
+            <div><a class="btn" href="./games/solitaire.html">Play</a></div>
+          </div>
+          <div class="desc">Klondike solitaire with drag & drop. Hint and peek features included.</div>
+        </a>
+
+        <a class="game-card" href="./games/chess.html">
+          <div class="thumb" aria-hidden="true">
+            <!-- Use existing chess SVG asset for a nicer thumbnail -->
+            <img src="./games/assets/pieces/wK.svg" alt="Chess piece thumbnail"/>
+          </div>
+          <div class="meta">
+            <div class="title">Chess</div>
+            <div><a class="btn" href="./games/chess.html">Play</a></div>
+          </div>
+          <div class="desc">Play vs AI or challenge yourself locally. Adjustable difficulty (ELO).</div>
+        </a>
+
+      </section>
+    </main>
+
+    <footer>
+      Hosted with ❤️ • <a href="https://github.com/RandomV5/randomsarcade.github.io" style="color:var(--muted);text-decoration:underline;">Source</a>
+    </footer>
+  </div>
+</body>
+</html>
