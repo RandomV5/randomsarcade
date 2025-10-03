@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcade Chatroom</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #0f1720; color: #e6eef3; text-align: center; }
+    .container { max-width: 500px; margin: 40px auto; background: #0f1520aa; border-radius: 14px; padding: 24px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); }
+    h1 { margin-bottom: 18px; }
+    .room-list { margin-bottom: 18px; }
+    .room { background: #071827; color: #00e6c3; padding: 8px 12px; border-radius: 8px; margin: 6px 0; cursor: pointer; }
+    .chat { background: #071827; border-radius: 8px; padding: 12px; margin-bottom: 12px; height: 220px; overflow-y: auto; }
+    .msg { margin: 6px 0; text-align: left; }
+    .msg .user { font-weight: bold; color: #ffd166; }
+    .msg .text { margin-left: 8px; }
+    input, button { padding: 8px; border-radius: 8px; border: none; margin: 4px; }
+    .input-row { display: flex; gap: 8px; margin-top: 8px; }
+    .input-row input { flex: 1; }
+    .room-code { font-size: 1.1em; color: #ffd166; margin-bottom: 8px; }
+    .public-toggle { margin-bottom: 12px; }
+    .leave-btn { margin-top: 12px; }
+    .setup { color: #ffd166; font-size: 0.95em; margin-bottom: 18px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Arcade Chatroom</h1>
+    <div class="setup">
+      <b>Setup required:</b> <br>
+      1. Create a Firebase project at <a href="https://console.firebase.google.com/" target="_blank" style="color:#00e6c3">Firebase Console</a>.<br>
+      2. Enable Firestore Database.<br>
+      3. Copy your Firebase config and paste it below.
+    </div>
+    <textarea id="firebaseConfig" rows="4" style="width:100%;margin-bottom:10px" placeholder="Paste Firebase config here..."></textarea>
+    <button onclick="initFirebase()">Initialize Chat</button>
+    <div id="mainUI" style="display:none">
+      <div id="roomUI">
+        <div class="public-toggle">
+          <label><input type="checkbox" id="publicRoom"> Public Room</label>
+        </div>
+        <input id="roomCodeInput" placeholder="Enter or create room code..." maxlength="12" />
+        <button onclick="joinRoom()">Join/Create Room</button>
+        <div class="room-list" id="roomList"></div>
+      </div>
+      <div id="chatUI" style="display:none">
+        <div class="room-code">Room: <span id="roomCodeDisplay"></span></div>
+        <div class="chat" id="chatBox"></div>
+        <div class="input-row">
+          <input id="userInput" placeholder="Your name..." maxlength="16" />
+          <input id="msgInput" placeholder="Type a message..." maxlength="120" />
+          <button onclick="sendMsg()">Send</button>
+        </div>
+        <button class="leave-btn" onclick="leaveRoom()">Leave Room</button>
+      </div>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    let db, currentRoom = null, unsubMsgs = null;
+    function initFirebase() {
+      const configText = document.getElementById('firebaseConfig').value.trim();
+      if (!configText) return alert('Paste your Firebase config first!');
+      let config;
+      try { config = eval('(' + configText + ')'); } catch (e) { alert('Invalid config!'); return; }
+      firebase.initializeApp(config);
+      db = firebase.firestore();
+      document.getElementById('mainUI').style.display = '';
+      loadPublicRooms();
+    }
+    function joinRoom() {
+      const code = document.getElementById('roomCodeInput').value.trim();
+      if (!code) return alert('Enter a room code!');
+      const isPublic = document.getElementById('publicRoom').checked;
+      currentRoom = code;
+      document.getElementById('roomUI').style.display = 'none';
+      document.getElementById('chatUI').style.display = '';
+      document.getElementById('roomCodeDisplay').textContent = code;
+      if (isPublic) {
+        db.collection('rooms').doc(code).set({ public: true }, { merge: true });
+      } else {
+        db.collection('rooms').doc(code).set({ public: false }, { merge: true });
+      }
+      listenForMsgs(code);
+    }
+    function leaveRoom() {
+      if (unsubMsgs) unsubMsgs();
+      currentRoom = null;
+      document.getElementById('chatUI').style.display = 'none';
+      document.getElementById('roomUI').style.display = '';
+      loadPublicRooms();
+    }
+    function sendMsg() {
+      const user = document.getElementById('userInput').value.trim() || 'Anon';
+      const text = document.getElementById('msgInput').value.trim();
+      if (!text) return;
+      db.collection('rooms').doc(currentRoom).collection('messages').add({ user, text, ts: Date.now() });
+      document.getElementById('msgInput').value = '';
+    }
+    function listenForMsgs(code) {
+      const chatBox = document.getElementById('chatBox');
+      unsubMsgs = db.collection('rooms').doc(code).collection('messages').orderBy('ts').onSnapshot(snap => {
+        chatBox.innerHTML = '';
+        snap.forEach(doc => {
+          const msg = doc.data();
+          const div = document.createElement('div');
+          div.className = 'msg';
+          div.innerHTML = `<span class='user'>${escapeHTML(msg.user)}</span><span class='text'>${escapeHTML(msg.text)}</span>`;
+          chatBox.appendChild(div);
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    }
+    function loadPublicRooms() {
+      const roomList = document.getElementById('roomList');
+      db.collection('rooms').where('public', '==', true).get().then(snap => {
+        roomList.innerHTML = '<b>Public Rooms:</b>';
+        snap.forEach(doc => {
+          const code = doc.id;
+          const div = document.createElement('div');
+          div.className = 'room';
+          div.textContent = code;
+          div.onclick = () => { document.getElementById('roomCodeInput').value = code; joinRoom(); };
+          roomList.appendChild(div);
+        });
+      });
+    }
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[tag]));
+    }
+  </script>
+</body>
+</html>

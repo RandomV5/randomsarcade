@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Four</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        h1 { margin-top: 20px; }
+        #board { display: grid; grid-template-columns: repeat(7, 60px); grid-gap: 5px; margin: 30px auto; }
+        .cell { width: 60px; height: 60px; background: #e0e0e0; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .cell.red { background: #ff6b6b; }
+        .cell.yellow { background: #ffd166; }
+        #status { margin: 20px; font-size: 1.2em; }
+        button { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Connect Four</h1>
+    <div id="status">Red's turn</div>
+    <div id="board"></div>
+    <button onclick="resetGame()">Restart</button>
+    <script>
+        const ROWS = 6, COLS = 7;
+        let board = Array.from({length: ROWS}, () => Array(COLS).fill(''));
+        let currentPlayer = 'red';
+        let gameActive = true;
+        const statusDiv = document.getElementById('status');
+        const boardDiv = document.getElementById('board');
+
+        function renderBoard() {
+            boardDiv.innerHTML = '';
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = 'cell' + (board[r][c] ? ' ' + board[r][c] : '');
+                    cellDiv.onclick = () => handleCellClick(c);
+                    boardDiv.appendChild(cellDiv);
+                }
+            }
+        }
+
+        function handleCellClick(col) {
+            if (!gameActive) return;
+            for (let row = ROWS - 1; row >= 0; row--) {
+                if (!board[row][col]) {
+                    board[row][col] = currentPlayer;
+                    renderBoard();
+                    if (checkWin(row, col)) {
+                        statusDiv.textContent = `${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)} wins!`;
+                        gameActive = false;
+                    } else if (board.flat().every(cell => cell)) {
+                        statusDiv.textContent = "It's a draw!";
+                        gameActive = false;
+                    } else {
+                        currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red';
+                        statusDiv.textContent = `${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}'s turn`;
+                    }
+                    break;
+                }
+            }
+        }
+
+        function checkWin(row, col) {
+            const directions = [
+                [[0,1],[0,-1]], [[1,0],[-1,0]], [[1,1],[-1,-1]], [[1,-1],[-1,1]]
+            ];
+            for (const [[dr1,dc1],[dr2,dc2]] of directions) {
+                let count = 1;
+                for (const [dr,dc] of [[dr1,dc1],[dr2,dc2]]) {
+                    let r = row+dr, c = col+dc;
+                    while (r>=0 && r<ROWS && c>=0 && c<COLS && board[r][c]===currentPlayer) {
+                        count++;
+                        r+=dr; c+=dc;
+                    }
+                }
+                if (count>=4) return true;
+            }
+            return false;
+        }
+
+        function resetGame() {
+            board = Array.from({length: ROWS}, () => Array(COLS).fill(''));
+            currentPlayer = 'red';
+            gameActive = true;
+            statusDiv.textContent = `Red's turn`;
+            renderBoard();
+        }
+
+        renderBoard();
+    </script>
+</body>
+</html>

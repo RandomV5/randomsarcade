@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rock Paper Scissors</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    h1 { margin-top: 20px; }
+    .choices { display: flex; justify-content: center; gap: 30px; margin: 30px 0; }
+    .choice { font-size: 2.5em; cursor: pointer; padding: 20px; border-radius: 12px; background: #f0f0f0; transition: background 0.2s; }
+    .choice:hover { background: #00e6c3; color: #222; }
+    #result { font-size: 1.2em; margin: 20px; }
+    #score { margin: 10px; }
+    button { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Rock Paper Scissors</h1>
+  <div id="score">Wins: 0 | Losses: 0 | Draws: 0</div>
+  <div class="choices">
+    <div class="choice" onclick="play('rock')">✊</div>
+    <div class="choice" onclick="play('paper')">✋</div>
+    <div class="choice" onclick="play('scissors')">✌️</div>
+  </div>
+  <div id="result">Choose your move!</div>
+  <button onclick="resetScore()">Reset Score</button>
+  <script>
+    let wins = 0, losses = 0, draws = 0;
+    const scoreDiv = document.getElementById('score');
+    const resultDiv = document.getElementById('result');
+    function play(player) {
+      const choices = ['rock', 'paper', 'scissors'];
+      const emojis = {rock:'✊', paper:'✋', scissors:'✌️'};
+      const ai = choices[Math.floor(Math.random() * 3)];
+      let result = '';
+      if (player === ai) { draws++; result = `Draw! Both chose ${emojis[player]}`; }
+      else if ((player === 'rock' && ai === 'scissors') || (player === 'paper' && ai === 'rock') || (player === 'scissors' && ai === 'paper')) {
+        wins++; result = `You win! ${emojis[player]} beats ${emojis[ai]}`;
+      } else {
+        losses++; result = `You lose! ${emojis[ai]} beats ${emojis[player]}`;
+      }
+      scoreDiv.textContent = `Wins: ${wins} | Losses: ${losses} | Draws: ${draws}`;
+      resultDiv.textContent = result;
+    }
+    function resetScore() {
+      wins = losses = draws = 0;
+      scoreDiv.textContent = `Wins: 0 | Losses: 0 | Draws: 0`;
+      resultDiv.textContent = 'Choose your move!';
+    }
+  </script>
+</body>
+</html>

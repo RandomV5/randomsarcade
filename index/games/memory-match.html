@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Match</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    h1 { margin-top: 20px; }
+    #gameBoard { display: grid; grid-template-columns: repeat(4, 80px); grid-gap: 10px; margin: 30px auto; }
+    .card { width: 80px; height: 80px; background: #f0f0f0; border-radius: 10px; font-size: 2em; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .card.flipped { background: #00e6c3; color: #222; }
+    #status { margin: 20px; font-size: 1.2em; }
+    button { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Memory Match</h1>
+  <div id="status">Find all pairs!</div>
+  <div id="gameBoard"></div>
+  <button onclick="startGame()">Restart</button>
+  <script>
+    const emojis = ['🍎','🍌','🍇','🍓','🍒','🍑','🍍','🥝'];
+    let board, flipped, matched, lock, moves;
+    const statusDiv = document.getElementById('status');
+    const gameBoard = document.getElementById('gameBoard');
+
+    function startGame() {
+      board = shuffle([...emojis, ...emojis]);
+      flipped = [];
+      matched = [];
+      lock = false;
+      moves = 0;
+      statusDiv.textContent = 'Find all pairs!';
+      renderBoard();
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function renderBoard() {
+      gameBoard.innerHTML = '';
+      board.forEach((emoji, i) => {
+        const card = document.createElement('div');
+        card.className = 'card' + (flipped.includes(i) || matched.includes(i) ? ' flipped' : '');
+        card.textContent = flipped.includes(i) || matched.includes(i) ? emoji : '';
+        card.onclick = () => handleCardClick(i);
+        gameBoard.appendChild(card);
+      });
+    }
+
+    function handleCardClick(i) {
+      if (lock || flipped.includes(i) || matched.includes(i)) return;
+      flipped.push(i);
+      renderBoard();
+      if (flipped.length === 2) {
+        moves++;
+        lock = true;
+        setTimeout(() => {
+          const [a, b] = flipped;
+          if (board[a] === board[b]) {
+            matched.push(a, b);
+            if (matched.length === board.length) {
+              statusDiv.textContent = `You win! Moves: ${moves}`;
+            }
+          }
+          flipped = [];
+          lock = false;
+          renderBoard();
+        }, 900);
+      }
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
